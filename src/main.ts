@@ -7,14 +7,37 @@ async function bootstrap() {
   app.enableCors();
 
   const config = new DocumentBuilder()
-    .setTitle('Technical Evaluation')
-    .setDescription('The technical evaluation API description')
-    .setVersion('1.0')
-    .addTag('products')
+    .setTitle('Technical Evaluation API')
+    .setVersion('1.0.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Enter your JWT token here (without Bearer prefix)',
+      },
+      'bearer',
+    )
+    .addTag('Authentication', 'User authentication and registration endpoints')
+    .addTag('Products', 'Product management CRUD operations')
     .build();
 
-  const document = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document());
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+      tagsSorter: 'alpha',
+      operationsSorter: 'alpha',
+      securityDefinitions: {
+        bearer: {
+          type: 'apiKey',
+          name: 'Authorization',
+          in: 'header',
+          description: 'Enter your bearer token in the format: Bearer {token}',
+        },
+      },
+    },
+  });
 
   await app.listen(process.env.PORT ?? 3000);
 }
